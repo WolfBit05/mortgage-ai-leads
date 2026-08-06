@@ -22,3 +22,11 @@ class Discussion(Base):
     created_at = Column(DateTime)
 
     scraped_at = Column(DateTime, default=datetime.utcnow)
+
+    score = Column(Integer, nullable=True)
+
+    comments_count = Column(Integer, nullable=True)
+
+    subreddit = Column(String, nullable=True)
+
+    flair = Column(String, nullable=True)
