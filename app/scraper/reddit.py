@@ -1,9 +1,7 @@
 from datetime import datetime
 
+from app.models.discussion_data import DiscussionData
 from app.browser.browser import launch_browser
-from app.database.db import SessionLocal
-from app.database.models import Discussion
-from app.database.repository import DiscussionRepository
 
 MAX_POSTS = 5
 
@@ -27,8 +25,7 @@ def scrape_reddit():
 
     print(f"Found {posts.count()} posts\n")
 
-    db = SessionLocal()
-    repo = DiscussionRepository(db)
+    discussions = []
 
     try:
         for i in range(min(MAX_POSTS, posts.count())):
@@ -42,7 +39,6 @@ def scrape_reddit():
             comments = post.get_attribute("comment-count")
 
             created_at = None
-
             if created:
                 created_at = datetime.strptime(
                     created,
@@ -62,27 +58,24 @@ def scrape_reddit():
 
                 url = "https://reddit.com" + permalink
 
-                if repo.exists(url):
-                    print(f"⏭ Skipped: {title}")
-                    continue
 
-                discussion = Discussion(
-                    platform="reddit",
-                    title=title,
-                    author=author,
-                    url=url,
-                    content="",
-                    created_at=created_at
+                discussion = DiscussionData(
+                platform="reddit",
+                title=title,
+                author=author,
+                url=url,
+                content="",
+                subreddit="FirstTimeHomeBuyer",
+                flair=None,
+                score=int(score) if score else None,
+                comments_count=int(comments) if comments else None,
+                created_at=created_at
                 )
 
-                repo.save(discussion)
-                print(f"✅ Saved: {title}")
-
-        repo.commit()
-        input("\nPress ENTER to close...")
+                discussions.append(discussion)
+        return discussions
 
     finally:
-        db.close()
         context.close()
         playwright.stop()
 
