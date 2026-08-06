@@ -13,10 +13,12 @@ def run():
     for discussion in discussions:
 
         if repo.exists(discussion.url):
+            print(f"⏭ Skipped: {discussion.title}")
             continue
 
         repo.save(discussion)
-
+        print(f"✅ Saved: {discussion.title}")
+        
     repo.commit()
     db.close()
 
