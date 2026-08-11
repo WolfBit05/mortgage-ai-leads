@@ -12,12 +12,17 @@ def run():
 
     for discussion in discussions:
 
-        if repo.exists(discussion.url):
-            print(f"⏭ Skipped: {discussion.title}")
-            continue
+        existing = repo.get_by_url(discussion.url)
 
-        repo.save(discussion)
-        print(f"✅ Saved: {discussion.title}")
+        if existing:
+            if not existing.content and discussion.content:
+                repo.update(existing, discussion)
+                print(f"🔄 Updated: {discussion.title}")
+            else:
+                print(f"⏭ Skipped: {discussion.title}")
+        else:
+            repo.save(discussion)
+            print(f"✅ Saved: {discussion.title}")
         
     repo.commit()
     db.close()

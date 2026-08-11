@@ -3,7 +3,7 @@ from datetime import datetime
 from app.models.discussion_data import DiscussionData
 from app.browser.browser import launch_browser
 
-MAX_POSTS = 5
+MAX_POSTS = 20
 
 SUBREDDIT_URL = "https://www.reddit.com/r/FirstTimeHomeBuyer/"
 
@@ -11,6 +11,8 @@ SUBREDDIT_URL = "https://www.reddit.com/r/FirstTimeHomeBuyer/"
 def scrape_reddit():
 
     playwright, context, page = launch_browser()
+
+    post_page = context.new_page()
 
     print(f"Opening {SUBREDDIT_URL}")
 
@@ -26,7 +28,7 @@ def scrape_reddit():
     print(f"Found {posts.count()} posts\n")
 
     discussions = []
-
+        
     try:
         for i in range(min(MAX_POSTS, posts.count())):
             post = posts.nth(i)
@@ -59,23 +61,48 @@ def scrape_reddit():
                 url = "https://reddit.com" + permalink
 
 
+                def extract_post_body(page, url):
+                    page.goto(
+                        url,
+                        wait_until="domcontentloaded"
+                    )
+
+                    page.wait_for_timeout(2000)
+
+                    post = page.locator("shreddit-post").first
+
+                    if post.count() == 0:
+                        return "" 
+
+                    text = post.inner_text().strip()
+                    
+
+                    print("Post Body:")
+                    print(text)
+
+                    return text
+
+                content = extract_post_body(post_page, url)
+
                 discussion = DiscussionData(
-                platform="reddit",
-                title=title,
-                author=author,
-                url=url,
-                content="",
-                subreddit="FirstTimeHomeBuyer",
-                flair=None,
-                score=int(score) if score else None,
-                comments_count=int(comments) if comments else None,
-                created_at=created_at
+                    platform="reddit",
+                    title=title,
+                    author=author,
+                    url=url,
+                    content=content,
+                    subreddit="FirstTimeHomeBuyer",
+                    flair=None,
+                    score=int(score) if score else None,
+                    comments_count=int(comments) if comments else None,
+                    created_at=created_at
                 )
 
                 discussions.append(discussion)
         return discussions
 
+
     finally:
+        post_page.close()
         context.close()
         playwright.stop()
 

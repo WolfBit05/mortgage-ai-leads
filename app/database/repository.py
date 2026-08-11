@@ -7,13 +7,17 @@ class DiscussionRepository:
     def __init__(self, db):
         self.db = db
 
-    def exists(self, url):
+    def get_by_url(self, url):
         return (
         self.db.query(Discussion)
         .filter(Discussion.url == url)
         .first()
-        is not None
     )
+
+    def update(self, discussion, discussion_data: DiscussionData):
+        discussion.content = discussion_data.content
+        discussion.score = discussion_data.score
+        discussion.comments_count = discussion_data.comments_count
 
 
     def save(self, discussion_data: DiscussionData):
