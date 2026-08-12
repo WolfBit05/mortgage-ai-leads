@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float
 from datetime import datetime
 
 from app.database.db import Base
@@ -30,3 +30,12 @@ class Discussion(Base):
     subreddit = Column(String, nullable=True)
 
     flair = Column(String, nullable=True)
+
+    primary_intent = Column(String(50), nullable=True)
+    primary_confidence = Column(Float, nullable=True)
+
+    secondary_intent = Column(String(50), nullable=True)    
+    secondary_confidence = Column(Float, nullable=True)
+
+    signals = Column(Text, nullable=True)
+    intent_summary = Column(Text, nullable=True)
